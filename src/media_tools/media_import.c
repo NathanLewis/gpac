@@ -8163,7 +8163,9 @@ void on_m2ts_import_data(GF_M2TS_Demuxer *ts, u32 evt_type, void *par)
 			}
 		}
 
-		if (samp->DTS >= pck->stream->first_dts) {
+		if (samp->DTS < pck->stream->first_dts) {
+			GF_LOG(GF_LOG_ERROR, GF_LOG_CONTAINER, ("[MPEG-2 TS Import] negative time sample - keeping calm and carrying on\n"));
+    }
 			samp->DTS -= pck->stream->first_dts;
 			samp->IsRAP = (pck->flags & GF_M2TS_PES_PCK_RAP) ? RAP : RAP_NO;
 			samp->data = pck->data;
@@ -8190,9 +8192,6 @@ void on_m2ts_import_data(GF_M2TS_Demuxer *ts, u32 evt_type, void *par)
 			if (pck->flags & GF_M2TS_PES_PCK_P_FRAME) tsimp->nb_p++;
 			if (pck->flags & GF_M2TS_PES_PCK_B_FRAME) tsimp->nb_b++;
 			tsimp->last_dts = samp->DTS + 1;
-		} else {
-			GF_LOG(GF_LOG_ERROR, GF_LOG_CONTAINER, ("[MPEG-2 TS Import] negative time sample - skipping\n"));
-		}
 		samp->data = NULL;
 		gf_isom_sample_del(&samp);
 	}
